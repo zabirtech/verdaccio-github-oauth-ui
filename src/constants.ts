@@ -16,6 +16,10 @@ export const cliAuthorizeUrl = "/oauth/authorize"
 export const publicGitHubOrigin = "https://github.com"
 export const publicGitHubApiOrigin = "https://api.github.com"
 
+export const publicBitBucketOrigin = "https://bitbucket.org"
+export const publicBitBucketApiOrigin = "https://api.bitbucket.org/2.0"
+
+
 /**
  * See https://verdaccio.org/docs/en/packages
  */

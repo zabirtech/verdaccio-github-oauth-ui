@@ -2,13 +2,13 @@ import {
   Config as IncorrectVerdaccioConfig,
   PackageAccess as IncorrectVerdaccioPackageAccess,
   Security,
-} from "@verdaccio/types"
-import get from "lodash/get"
-import assert from "ow"
-import process from "process"
-import { PartialDeep, OmitIndexSignature } from "type-fest"
-import { pluginKey, publicGitHubOrigin } from "../../constants"
-import { logger } from "../../logger"
+} from "@verdaccio/types";
+import get from "lodash/get";
+import assert from "ow";
+import process from "process";
+import { PartialDeep, OmitIndexSignature } from "type-fest";
+import { pluginKey, publicGitHubOrigin } from "../../constants";
+import { logger } from "../../logger";
 
 //
 // Types
@@ -17,65 +17,66 @@ import { logger } from "../../logger"
 // Verdaccio incorrectly types some of these as string arrays
 // although they are all strings.
 export interface PackageAccess extends IncorrectVerdaccioPackageAccess {
-  unpublish?: string[]
+  unpublish?: string[];
 }
 
 export type VerdaccioConfig = Omit<
   OmitIndexSignature<IncorrectVerdaccioConfig>,
   "packages" | "security"
 > & {
-  packages?: Record<string, PackageAccess>
-  security?: PartialDeep<Security>
+  packages?: Record<string, PackageAccess>;
+  security?: PartialDeep<Security>;
 }
 
 export interface PluginConfig {
-  "client-id": string
-  "client-secret": string
-  token: string
-  "enterprise-origin"?: string
+  "client-id": string;
+  "client-secret": string;
+  token: string;
+  "enterprise-origin"?: string;
+  "redirect-uri": string;
 }
 
 export interface Config extends VerdaccioConfig {
-  middlewares: { [key: string]: PluginConfig }
-  auth: { [key: string]: PluginConfig }
+  middlewares: { [key: string]: PluginConfig };
+  auth: { [key: string]: PluginConfig };
 }
 
 export interface GroupParts {
-  providerId?: string
-  key1?: string
-  value1?: string
-  key2?: string
-  value2?: string
-  key3?: string
+  providerId?: string;
+  key1?: string;
+  value1?: string;
+  key2?: string;
+  value2?: string;
+  key3?: string;
 }
 
 export type ParsedUser = {
-  group: string
-  user: string
-}
+  group: string;
+  user: string;
+};
 
 export type ParsedOrg = {
-  group: string
-  org: string
-}
+  group: string;
+  org: string;
+};
 
 export type ParsedTeam = {
-  group: string
-  org: string
-  team: string
-}
+  group: string;
+  org: string;
+  team: string;
+};
 
 export type ParsedRepo = {
-  group: string
-  owner: string
-  repo: string
-}
+  group: string;
+  owner: string;
+  repo: string;
+};
 
 /**
  * e.g. "5.0.4"
  */
 export function getVersion(): string {
-  return require("verdaccio/package.json").version
+  return require("verdaccio/package.json").version;
 }
 
 //
@@ -83,37 +84,37 @@ export function getVersion(): string {
 //
 
 function validateVersion() {
-  const version = getVersion()
+  const version = getVersion();
 
   if (version < "5") {
-    throw new Error("This plugin requires verdaccio 5 or above")
+    throw new Error("This plugin requires verdaccio 5 or above");
   }
 }
 
 function validateNodeExists(config: Config, node: keyof Config) {
-  const path = `[${node}][${pluginKey}]`
-  const obj = get(config, path, {})
+  const path = `[${node}][${pluginKey}]`;
+  const obj = get(config, path, {});
 
   if (!Object.keys(obj).length) {
-    throw new Error(`"${node}.${pluginKey}" must be enabled`)
+    throw new Error(`"${node}.${pluginKey}" must be enabled`);
   }
 }
 
 function getConfigValue<T>(config: Config, key: string, predicate: any): T {
-  let valueOrEnvName = get(config, ["auth", pluginKey, key])
+  let valueOrEnvName = get(config, ["auth", pluginKey, key]);
 
-  const value = process.env[String(valueOrEnvName)] ?? valueOrEnvName
+  const value = process.env[String(valueOrEnvName)] ?? valueOrEnvName;
 
   try {
-    assert(value, predicate)
+    assert(value, predicate);
   } catch (error) {
     logger.error(
       `Invalid configuration at "auth.${pluginKey}.${key}": ${error.message} — Please check your verdaccio config.`,
-    )
-    process.exit(1)
+    );
+    process.exit(1);
   }
 
-  return value as T
+  return value as T;
 }
 
 //
@@ -121,25 +122,25 @@ function getConfigValue<T>(config: Config, key: string, predicate: any): T {
 //
 
 export class ParsedPluginConfig {
-  readonly url_prefix = this.config.url_prefix ?? ""
+  readonly url_prefix = this.config.url_prefix ?? "";
 
   readonly clientId = getConfigValue<string>(
     this.config,
     "client-id",
     assert.string.nonEmpty,
-  )
+  );
 
   readonly clientSecret = getConfigValue<string>(
     this.config,
     "client-secret",
     assert.string.nonEmpty,
-  )
+  );
 
   readonly token = getConfigValue<string>(
     this.config,
     "token",
     assert.string.nonEmpty,
-  )
+  );
 
   readonly enterpriseOrigin = getConfigValue<string | undefined>(
     this.config,
@@ -148,68 +149,74 @@ export class ParsedPluginConfig {
       assert.undefined,
       assert.string.url.nonEmpty.not.startsWith(publicGitHubOrigin),
     ),
-  )
+  );
+
+  readonly redirectUri = getConfigValue<string>(
+    this.config,
+    "redirect-uri",
+    assert.string.nonEmpty,
+  );
 
   constructor(readonly config: Config) {
-    validateVersion()
+    validateVersion();
 
-    validateNodeExists(config, "middlewares")
-    validateNodeExists(config, "auth")
+    validateNodeExists(config, "middlewares");
+    validateNodeExists(config, "auth");
 
-    this.parseConfiguredPackageGroups()
+    this.parseConfiguredPackageGroups();
   }
 
-  readonly configuredGroupsMap: Record<string, boolean> = {}
-  readonly parsedUsers: ParsedUser[] = []
-  readonly parsedOrgs: ParsedOrg[] = []
-  readonly parsedTeams: ParsedTeam[] = []
-  readonly parsedRepos: ParsedRepo[] = []
+  readonly configuredGroupsMap: Record<string, boolean> = {};
+  readonly parsedUsers: ParsedUser[] = [];
+  readonly parsedOrgs: ParsedOrg[] = [];
+  readonly parsedTeams: ParsedTeam[] = [];
+  readonly parsedRepos: ParsedRepo[] = [];
 
   isGroupConfigured(group: string) {
-    return !!this.configuredGroupsMap[group]
+    return !!this.configuredGroupsMap[group];
   }
 
   /**
-   * Returns all permission groups used in the Verdacio config.
+   * Returns all permission groups used in the Verdaccio config.
    */
   private parseConfiguredPackageGroups() {
     const configuredGroups = Object.values(this.config.packages || {}).flatMap(
       (packageConfig) => {
         return ["access", "publish", "unpublish"].flatMap((action) => {
-          const allowedGroups = packageConfig[action]
+          const allowedGroups = packageConfig[action];
 
           if (typeof allowedGroups === "string") {
-            return allowedGroups
+            return allowedGroups;
           }
 
           if (
             Array.isArray(allowedGroups) &&
             allowedGroups.every((group) => typeof group === "string")
           ) {
-            return allowedGroups as string[]
+            return allowedGroups as string[];
           }
 
-          return []
-        })
+          return [];
+        });
       },
-    )
+    );
 
-    const configuredGroupsDeduped = [...new Set(configuredGroups)]
+    const configuredGroupsDeduped = [...new Set(configuredGroups)];
 
     configuredGroupsDeduped.forEach((group) => {
-      const [providerId, key1, value1, key2, value2, key3] = group.split("/")
+      const [providerId, key1, value1, key2, value2, key3] = group.split("/");
 
-      if (providerId !== "github") {
-        return null
+      if (providerId !== "bitbucket") {
+        return null;
       }
 
       if (key1 === "user" && !key2) {
         const parsedUser: ParsedUser = {
           group,
           user: value1,
-        }
-        this.parsedUsers.push(parsedUser)
-        this.configuredGroupsMap[group] = true
+        };
+        this.parsedUsers.push(parsedUser);
+        this.configuredGroupsMap[group] = true;
       }
 
       if (key1 === "org" && key2 === "team" && !key3) {
@@ -217,9 +224,9 @@ export class ParsedPluginConfig {
           group,
           org: value1,
           team: value2,
-        }
-        this.parsedTeams.push(parsedTeam)
-        this.configuredGroupsMap[group] = true
+        };
+        this.parsedTeams.push(parsedTeam);
+        this.configuredGroupsMap[group] = true;
       }
 
       if ((key1 === "org" || key1 === "user") && key2 === "repo" && !key3) {
@@ -227,19 +234,19 @@ export class ParsedPluginConfig {
           group,
           owner: value1,
           repo: value2,
-        }
-        this.parsedRepos.push(parsedRepo)
-        this.configuredGroupsMap[group] = true
+        };
+        this.parsedRepos.push(parsedRepo);
+        this.configuredGroupsMap[group] = true;
       }
 
       if (key1 === "org" && !key2) {
         const parsedOrg: ParsedOrg = {
           group,
           org: value1,
-        }
-        this.parsedOrgs.push(parsedOrg)
-        this.configuredGroupsMap[group] = true
+        };
+        this.parsedOrgs.push(parsedOrg);
+        this.configuredGroupsMap[group] = true;
       }
-    })
+    });
   }
 }

@@ -10,6 +10,7 @@ import { Application } from "express"
 import { logger } from "../../logger"
 import { CliFlow, WebFlow } from "../flows"
 import { GitHubAuthProvider } from "../github"
+
 import { AuthCore } from "./AuthCore"
 import { Cache } from "./Cache"
 import { Config, PackageAccess, ParsedPluginConfig } from "./Config"
@@ -17,13 +18,14 @@ import { PatchHtml } from "./PatchHtml"
 import { registerGlobalProxyAgent } from "./ProxyAgent"
 import { ServeStatic } from "./ServeStatic"
 import { Verdaccio } from "./Verdaccio"
+import { BitbucketAuthProvider } from "../bitbucket/BitbucketAuthProvider"
 
 /**
  * Implements the verdaccio plugin interfaces.
  */
 export class Plugin implements IPluginMiddleware<any>, IPluginAuth<any> {
   private readonly parsedConfig = new ParsedPluginConfig(this.config)
-  private readonly provider = new GitHubAuthProvider(this.parsedConfig)
+  private readonly provider = new BitbucketAuthProvider(this.parsedConfig)
   private readonly cache = new Cache(this.provider)
   private readonly verdaccio = new Verdaccio(this.config)
   private readonly core = new AuthCore(this.verdaccio, this.parsedConfig)

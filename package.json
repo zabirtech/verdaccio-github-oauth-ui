@@ -1,10 +1,11 @@
 {
   "$schema": "http://json.schemastore.org/package",
-  "name": "verdaccio-github-oauth-ui",
+  "name": "verdaccio-bitbucket-oauth-ui",
   "version": "6.0.8",
   "keywords": [
     "authentication",
     "github",
+    "bitbucket",
     "login",
     "npm",
     "oauth",
@@ -51,6 +52,7 @@
     "@octokit/oauth-methods": "^4.1.0",
     "@octokit/request": "^8.4.0",
     "@verdaccio/url": "^11.0.0-6-next.42",
+    "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "global-agent": "^3.0.0",
@@ -75,6 +77,7 @@
     "@types/query-string": "^6.3.0",
     "@verdaccio/types": "^10.8.0",
     "@vitest/coverage-v8": "^1.6.0",
+    "axios": "^1.7.2",
     "browserslist": "^4.23.0",
     "core-js": "^3.37.1",
     "nodemon": "^3.1.0",
