@@ -14,8 +14,7 @@ export class BitbucketClient {
 
       logger.log(`[bitbucket-oauth-ui] Requesting access token with params: ${JSON.stringify(params)}`);
 
-      const response = await axios.post(`${this.webBaseUrl}/site/oauth2/access_token`, null, {
-        params: params,
+      const response = await axios.post(`${this.webBaseUrl}/site/oauth2/access_token`, params, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -27,7 +26,7 @@ export class BitbucketClient {
       logger.log(`[bitbucket-oauth-ui] Received access token response: ${JSON.stringify(response.data)}`);
       return response.data;
     } catch (error) {
-      logger.error(`[bitbucket-oauth-ui] Failed requesting Bitbucket access token: ${error.message}`);
+      logger.error(`[bitbucket-oauth-ui] Failed requesting Bitbucket access token: ${error.message}`, JSON.stringify(error.response.data));
       throw new Error("Failed requesting Bitbucket access token: " + error.message);
     }
   }
