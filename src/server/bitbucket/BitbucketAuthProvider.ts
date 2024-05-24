@@ -44,12 +44,12 @@ export class BitbucketAuthProvider implements AuthProvider {
       this.config.clientSecret,
       this.config.redirectUri
     );
-    return response.access_token; // Adjust to match Bitbucket's response structure
+    return response.access_token;
   }
 
   async getUserName(token: string) {
     const response = await this.client.requestUser(token);
-    return response.username; // Adjust to match Bitbucket's response structure
+    return response.username;
   }
 
   async getGroups(userName: string) {
@@ -75,7 +75,7 @@ export class BitbucketAuthProvider implements AuthProvider {
   }
 
   private generateState(): string {
-    return "someRandomStateString"; // Replace with actual state generation logic
+    return "someRandomStateString";
   }
 
   private buildQueryParams(params: Record<string, string>): string {
