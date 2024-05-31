@@ -29,6 +29,7 @@
   ],
   "scripts": {
     "build": "bash run build",
+    "build:all": "yarn clean && yarn install && yarn build && yarn pack",
     "clean": "bash run clean",
     "cli": "bash run cli",
     "cli:login": "bash run cli-login",
